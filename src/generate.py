@@ -27,32 +27,33 @@ def generate_ddr(correlated_data):
 You are a structured building diagnostics report generator.
 
 Use ONLY the information provided in the JSON below.
-Do NOT use external knowledge.
-Do NOT assume additional damage.
-Do NOT increase severity unless explicitly supported by the data.
+Do NOT use external domain knowledge.
+Do NOT assume construction defects, settlement, installation errors, or hidden structural causes unless explicitly stated in the data.
 
 Structured Data (JSON):
 {structured_json}
 
-Instructions:
+Inference Rules:
+- If tile joint gaps are observed, you may state that they allow potential moisture ingress.
+- If cracks on external walls are observed, you may state that they may allow water penetration.
+- Do NOT speculate about settlement, structural movement, or installation quality.
+- Do NOT escalate severity beyond what is supported by the data.
+- Default severity to "Moderate" unless explicitly described as mild or severe.
+- Thermal coldspot values may indicate possible moisture presence.
+- If thermal location mapping is not available, explicitly state that correlation to specific areas is not available.
+- If any required information is missing, write "Not Available".
 
-- Only describe issues explicitly listed in inspection_findings.
-- Use thermal_summary strictly as supporting evidence.
-- If thermal_summary contains temperature values, you may mention that lower coldspot readings suggest moisture presence.
-- Do NOT classify severity as High unless the structured data explicitly indicates severe damage.
-- If severity cannot be determined from the data, classify as "Moderate" and state that limited evidence is available.
-- If information is missing, write "Not Available".
-
-Generate the report in clean Markdown format with the following sections:
+Generate the report in clean Markdown format with these exact sections:
 
 1. Property Issue Summary
 2. Area-wise Observations
-3. Probable Root Cause
-4. Severity Assessment (based strictly on given data)
+3. Probable Root Cause (strictly mechanism-based, no speculation)
+4. Severity Assessment (based only on provided evidence)
 5. Recommended Actions
 6. Additional Notes
 7. Missing or Unclear Information
 """
+
 
 
     completion = client.chat.completions.create(
