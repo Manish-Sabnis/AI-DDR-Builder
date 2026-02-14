@@ -6,15 +6,20 @@ def extract_inspection_data(pdf_path):
     issues = []
 
     with pdfplumber.open(pdf_path) as pdf:
-        full_text = ""
+        summary_text = ""
+
         for page in pdf.pages:
             text = page.extract_text()
-            if text:
-                full_text += text + "\n"
+            if text and "SUMMARY TABLE" in text:
+                summary_text = text
+                break
 
-    # Extract impacted area observations from summary table
+    if not summary_text:
+        return []
+    summary_text = summary_text.replace("\n", " ")
+
     pattern = r"Observed (.*?) of (.*?) of Flat No\. 103"
-    matches = re.findall(pattern, full_text)
+    matches = re.findall(pattern, summary_text)
 
     for match in matches:
         issues.append({
@@ -25,23 +30,29 @@ def extract_inspection_data(pdf_path):
     return issues
 
 
+
 def extract_thermal_data(pdf_path):
     thermal_entries = []
 
     with pdfplumber.open(pdf_path) as pdf:
         for i, page in enumerate(pdf.pages):
-            text = page.extract_text()
-            if not text:
+
+            words = page.extract_words()
+            if not words:
                 continue
 
-            hotspot = re.search(r"Hotspot\s*:\s*([\d\.]+)", text)
-            coldspot = re.search(r"Coldspot\s*:\s*([\d\.]+)", text)
+            page_text = " ".join(word["text"] for word in words)
 
-            if hotspot and coldspot:
+            hotspot_match = re.search(r"Hotspot\s*:\s*([\d\.]+)", page_text)
+            coldspot_match = re.search(r"Coldspot\s*:\s*([\d\.]+)", page_text)
+
+            if hotspot_match and coldspot_match:
                 thermal_entries.append({
                     "page": i + 1,
-                    "hotspot": float(hotspot.group(1)),
-                    "coldspot": float(coldspot.group(1))
+                    "hotspot": float(hotspot_match.group(1)),
+                    "coldspot": float(coldspot_match.group(1))
                 })
 
     return thermal_entries
+
+

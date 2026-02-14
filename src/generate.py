@@ -1,11 +1,14 @@
 import os
-import requests
 from dotenv import load_dotenv
+from huggingface_hub import InferenceClient
 
 load_dotenv()
 
-HF_TOKEN = os.getenv("HF_TOKEN")
-MODEL = "mistralai/Mistral-7B-Instruct-v0.2"
+client = InferenceClient(
+    api_key=os.environ["HF_TOKEN"]
+)
+
+MODEL = "mistralai/Mistral-7B-Instruct-v0.2:cheapest"
 
 
 def generate_ddr(correlated_data):
@@ -31,24 +34,13 @@ Rules:
   7. Missing or Unclear Information
 """
 
-    url = f"https://api-inference.huggingface.co/models/{MODEL}"
-    headers = {
-        "Authorization": f"Bearer {HF_TOKEN}",
-        "Content-Type": "application/json"
-    }
+    completion = client.chat.completions.create(
+        model=MODEL,
+        messages=[
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.2,
+        max_tokens=900,
+    )
 
-    payload = {
-        "inputs": prompt,
-        "parameters": {
-            "max_new_tokens": 900,
-            "temperature": 0.2
-        }
-    }
-
-    response = requests.post(url, headers=headers, json=payload)
-
-    if response.status_code != 200:
-        return f"Error: {response.text}"
-
-    result = response.json()
-    return result[0]["generated_text"]
+    return completion.choices[0].message.content
