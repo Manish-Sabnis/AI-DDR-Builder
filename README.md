@@ -39,15 +39,19 @@ The workflow is divided into four stages:
 
 ### How to Run
 
-1. Install dependencies: `pip install -r requirements.txt`
+1. Ensure Tesseract OCR is installed on your system.
+    - On Ubuntu/WSL: `sudo apt install tesseract-ocr`
+    - On Windows: `Install from official Tesseract installer.`
 
-2. Install Tesseract OCR on your system.
+2. Install dependencies: `pip install -r requirements.txt`
 
-3. Create `.env` file: `HF_TOKEN=your_huggingface_token_here`
+3. Install Tesseract OCR on your system.
 
-4. Place inspection and thermal PDFs inside: `data/`
+4. Create `.env` file: `HF_TOKEN=your_huggingface_token_here`
 
-5. Run: `python src/main.py`
+5. Place inspection and thermal PDFs inside: `data/`
+
+6. Run: `python src/main.py`
 
 Output will be generated at: `outputs/DDR_Report.md`
 
