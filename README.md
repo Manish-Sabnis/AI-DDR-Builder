@@ -45,7 +45,7 @@ The workflow is divided into four stages:
 
 3. Create `.env` file: `HF_TOKEN=your_huggingface_token_here`
 
-4. Place inspection and thermal PDFs inside: data/
+4. Place inspection and thermal PDFs inside: `data/`
 
 5. Run: `python src/main.py`
 
@@ -67,3 +67,4 @@ The system prioritizes:
 - Generalization to similar inspection reports
 
 **The emphasis is on reliability and structured reasoning rather than UI complexity.**
+
