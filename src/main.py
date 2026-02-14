@@ -10,11 +10,6 @@ def main():
 
     inspection_data = extract_inspection_data(inspection_path)
     thermal_data = extract_thermal_data(thermal_path)
-
-    print("Inspection Data:", inspection_data)
-    print("Thermal Data:", thermal_data)
-
-
     correlated = correlate_data(inspection_data, thermal_data)
 
     report = generate_ddr(correlated)
