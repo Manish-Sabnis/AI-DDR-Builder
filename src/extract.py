@@ -1,6 +1,8 @@
 import pdfplumber
 import re
-
+import pytesseract
+from pdf2image import convert_from_path
+import re
 
 def extract_inspection_data(pdf_path):
     issues = []
@@ -16,43 +18,48 @@ def extract_inspection_data(pdf_path):
 
     if not summary_text:
         return []
+
+
     summary_text = summary_text.replace("\n", " ")
 
-    pattern = r"Observed (.*?) of (.*?) of Flat No\. 103"
+
+    pattern = r"Observed (.*?) of Flat No\. 103"
     matches = re.findall(pattern, summary_text)
 
     for match in matches:
+        clean_issue = match.strip()
+        if "Flat No. 203" in clean_issue:
+            continue
+
         issues.append({
-            "issue": match[0].strip(),
-            "location": match[1].strip()
+            "issue": clean_issue
         })
 
     return issues
 
 
 
+
 def extract_thermal_data(pdf_path):
     thermal_entries = []
 
-    with pdfplumber.open(pdf_path) as pdf:
-        for i, page in enumerate(pdf.pages):
+    pages = convert_from_path(pdf_path)
 
-            words = page.extract_words()
-            if not words:
-                continue
+    for i, page in enumerate(pages):
+        text = pytesseract.image_to_string(page)
 
-            page_text = " ".join(word["text"] for word in words)
+        hotspot_match = re.search(r"Hotspot\s*:\s*([\d\.]+)", text)
+        coldspot_match = re.search(r"Coldspot\s*:\s*([\d\.]+)", text)
 
-            hotspot_match = re.search(r"Hotspot\s*:\s*([\d\.]+)", page_text)
-            coldspot_match = re.search(r"Coldspot\s*:\s*([\d\.]+)", page_text)
-
-            if hotspot_match and coldspot_match:
-                thermal_entries.append({
-                    "page": i + 1,
-                    "hotspot": float(hotspot_match.group(1)),
-                    "coldspot": float(coldspot_match.group(1))
-                })
+        if hotspot_match and coldspot_match:
+            thermal_entries.append({
+                "page": i + 1,
+                "hotspot": float(hotspot_match.group(1)),
+                "coldspot": float(coldspot_match.group(1))
+            })
 
     return thermal_entries
+
+
 
 
